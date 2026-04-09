@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Tablero DOR — Plataforma DOR 2026',
+  title: 'TuTableroDOR — Plataforma DOR 2026',
   description: 'Control de incentivos, puntos DOR y ranking para la Red Empresas e Instituciones BBVA México.',
   keywords: ['DOR', 'incentivos', 'BBVA', 'ranking', 'ejecutivos'],
 }

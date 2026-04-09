@@ -52,7 +52,7 @@ export function Sidebar({ profile, onSignOut }: SidebarProps) {
           <BarChart3 className="w-4 h-4 text-primary-dark" />
         </div>
         <div>
-          <p className="text-white font-bold text-sm leading-none">Tablero DOR</p>
+          <p className="text-white font-bold text-sm leading-none">TuTableroDOR</p>
           <p className="text-white/50 text-xs mt-0.5">DOR 2026</p>
         </div>
       </div>

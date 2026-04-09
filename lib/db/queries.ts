@@ -154,6 +154,20 @@ export async function upsertScoringRule(
     .single()
 }
 
+// Obtiene las reglas efectivas para un usuario: overrides personales sobre base global
+export async function getMergedScoringRules(
+  supabase: SupabaseClient,
+  positionId: string,
+  profileId: string
+): Promise<ScoringRule[]> {
+  const { globalRules, userRules } = await getUserScoringRules(supabase, positionId, profileId)
+  // Para cada regla global, si existe override personal lo usa; si no, usa la global
+  return globalRules.map(global => {
+    const override = userRules.find(u => u.indicator_id === global.indicator_id)
+    return override ? { ...global, ...override, indicator: global.indicator, position: global.position } : global
+  })
+}
+
 // Obtiene reglas globales + overrides personales del usuario para un puesto
 export async function getUserScoringRules(
   supabase: SupabaseClient,

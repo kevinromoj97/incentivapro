@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
-import { getMyProfile, getMonthlyInputs, getScoringRules, getIndicators, getActivePeriod } from '@/lib/db/queries'
+import { getMyProfile, getMonthlyInputs, getMergedScoringRules, getIndicators, getActivePeriod } from '@/lib/db/queries'
 import { Header } from '@/components/layout/Header'
 import { CaptureTable } from '@/features/capture/CaptureTable'
 
@@ -19,7 +19,7 @@ export default async function CapturaPage() {
 
   const [{ data: inputs }, { data: rules }, { data: indicators }] = await Promise.all([
     getMonthlyInputs(supabase, profile.id, year),
-    profile.position_id ? getScoringRules(supabase, profile.position_id) : Promise.resolve({ data: [] }),
+    profile.position_id ? getMergedScoringRules(supabase, profile.position_id, profile.id).then(r => ({ data: r })) : Promise.resolve({ data: [] }),
     getIndicators(supabase),
   ])
 

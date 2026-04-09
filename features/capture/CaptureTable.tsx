@@ -104,6 +104,22 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
     })
   }
 
+  // Meses válidos para una frecuencia
+  function validMonths(frequency: string): number[] {
+    switch (frequency) {
+      case 'trimestral': return [3, 6, 9, 12]
+      case 'semestral':  return [6, 12]
+      case 'anual':      return [12]
+      default:           return [1,2,3,4,5,6,7,8,9,10,11,12]
+    }
+  }
+
+  // Obtiene la frecuencia efectiva de un indicador (override personal o la del indicador)
+  function getEffectiveFrequency(indicatorId: string, ind: { frequency: string }) {
+    const rule = rules.find(r => r.indicator_id === indicatorId)
+    return (rule?.config_json?.frequency as string) || ind.frequency
+  }
+
   // Calcula consecución de una celda
   function getCons(indicatorId: string, month: number) {
     const cell = cells[indicatorId]?.[month]
@@ -168,13 +184,15 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
       {/* Table per indicator */}
       {myIndicators.map(ind => {
         const rule = rules.find(r => r.indicator_id === ind.id)
+        const effectiveFreq = getEffectiveFrequency(ind.id, ind)
+        const allowed = validMonths(effectiveFreq)
         return (
           <div key={ind.id} className="bg-white rounded-xl border border-border shadow-card overflow-hidden">
             {/* Indicator header */}
             <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-border">
               <div>
                 <h3 className="text-sm font-semibold text-text-primary">{ind.name}</h3>
-                <p className="text-xs text-text-secondary capitalize">{ind.frequency} · Peso: {rule?.weight ?? '—'} pts</p>
+                <p className="text-xs text-text-secondary capitalize">{effectiveFreq} · Peso: {rule?.weight ?? '—'} pts</p>
               </div>
             </div>
             {/* Monthly table */}
@@ -197,16 +215,18 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
                     const cell = cells[ind.id]?.[month] ?? { budget: '', result: '' }
                     const calc = getCons(ind.id, month)
                     const isCurrentMonth = month === currentMonth
+                    const isApplicable = allowed.includes(month)
 
                     return (
                       <tr key={month} className={cn(
                         'border-b border-border last:border-0 transition-colors',
-                        isCurrentMonth ? 'bg-primary/2' : 'hover:bg-gray-50/50'
+                        !isApplicable ? 'opacity-40 bg-gray-50' : isCurrentMonth ? 'bg-primary/2' : 'hover:bg-gray-50/50'
                       )}>
                         <td className="py-2.5 px-4">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-text-primary">{monthName}</span>
-                            {isCurrentMonth && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">Actual</span>}
+                            {isCurrentMonth && isApplicable && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">Actual</span>}
+                            {!isApplicable && <span className="text-[10px] text-text-secondary italic">N/A</span>}
                           </div>
                         </td>
                         <td className="py-2 px-2">
@@ -216,7 +236,8 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
                             step="any"
                             value={cell.budget}
                             onChange={e => handleChange(ind.id, month, 'budget', e.target.value)}
-                            className="input-clean text-right tabular-nums text-sm w-36"
+                            disabled={!isApplicable}
+                            className={cn('input-clean text-right tabular-nums text-sm w-36', !isApplicable && 'cursor-not-allowed')}
                             placeholder="0"
                           />
                         </td>
@@ -227,7 +248,8 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
                             step="any"
                             value={cell.result}
                             onChange={e => handleChange(ind.id, month, 'result', e.target.value)}
-                            className="input-clean text-right tabular-nums text-sm w-36"
+                            disabled={!isApplicable}
+                            className={cn('input-clean text-right tabular-nums text-sm w-36', !isApplicable && 'cursor-not-allowed')}
                             placeholder="0"
                           />
                         </td>

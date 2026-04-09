@@ -37,15 +37,21 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
   function startEdit(rule: ScoringRule) {
     setEditingId(rule.indicator_id)
     const active = overrides[rule.indicator_id] ?? rule
+    const effectiveFrequency = (active.config_json?.frequency as string) || active.indicator?.frequency || global_freq(rule)
     setEditValues({
-      weight:     active.weight,
-      min_logro:  active.min_logro,
-      ppto_logro: active.ppto_logro,
-      max_logro:  active.max_logro,
-      min_cons:   active.min_cons,
-      ppto_cons:  active.ppto_cons,
-      max_cons:   active.max_cons,
+      weight:      active.weight,
+      min_logro:   active.min_logro,
+      ppto_logro:  active.ppto_logro,
+      max_logro:   active.max_logro,
+      min_cons:    active.min_cons,
+      ppto_cons:   active.ppto_cons,
+      max_cons:    active.max_cons,
+      config_json: { ...(active.config_json ?? {}), frequency: effectiveFrequency },
     })
+  }
+
+  function global_freq(rule: ScoringRule) {
+    return rule.indicator?.frequency ?? 'mensual'
   }
 
   function cancelEdit() {
@@ -60,6 +66,7 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
         indicator_id: globalRule.indicator_id,
         position_id:  globalRule.position_id,
         ...editValues,
+        config_json: editValues.config_json ?? null,
       })
       if (!error && data) {
         setOverrides(prev => ({ ...prev, [globalRule.indicator_id]: data }))
@@ -168,7 +175,29 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
                       </div>
                     </td>
                     <td className="hidden sm:table-cell text-xs text-text-secondary capitalize">
-                      {global.indicator?.frequency}
+                      {isEditing ? (
+                        <select
+                          value={(editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual'}
+                          onChange={e => setEditValues(prev => ({
+                            ...prev,
+                            config_json: { ...(prev.config_json ?? {}), frequency: e.target.value },
+                          }))}
+                          className="input-clean text-sm py-1"
+                        >
+                          <option value="mensual">Mensual</option>
+                          <option value="trimestral">Trimestral</option>
+                          <option value="semestral">Semestral</option>
+                          <option value="anual">Anual</option>
+                        </select>
+                      ) : (
+                        <span className={cn(
+                          (override?.config_json?.frequency && override.config_json.frequency !== global.indicator?.frequency)
+                            ? 'text-accent-dark font-semibold'
+                            : ''
+                        )}>
+                          {(active.config_json?.frequency as string) || active.indicator?.frequency}
+                        </span>
+                      )}
                     </td>
                     <td className="text-right tabular-nums">
                       {isEditing ? field('weight') : <span className="font-bold text-primary">{active.weight}</span>}

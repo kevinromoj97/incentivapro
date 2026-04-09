@@ -67,34 +67,20 @@ export function RegisterForm({ positions, leagues }: RegisterFormProps) {
         return
       }
 
-      // 2. Esperar a que el trigger cree el perfil (hasta 3 segundos)
-      let profileReady = false
-      for (let i = 0; i < 6; i++) {
-        await new Promise(r => setTimeout(r, 500))
-        const { data: check } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('auth_user_id', authData.user.id)
-          .maybeSingle()
-        if (check) { profileReady = true; break }
-      }
+      // 2. Crear perfil via API route (usa service role, no depende del trigger)
+      const res = await fetch('/api/complete-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName:     form.fullName,
+          email:        form.email,
+          positionId:   form.positionId,
+          leagueId:     form.leagueId,
+          employeeCode: form.employeeCode,
+        }),
+      })
 
-      if (!profileReady) {
-        setError('No se pudo inicializar tu perfil. Intenta de nuevo.')
-        return
-      }
-
-      // 3. Actualizar con los datos del formulario
-      const { error: profileError } = await supabase.from('profiles').update({
-        full_name: form.fullName,
-        email: form.email,
-        role: 'ejecutivo',
-        position_id: form.positionId,
-        league_id: form.leagueId,
-        employee_code: form.employeeCode || null,
-      }).eq('auth_user_id', authData.user.id)
-
-      if (profileError) {
+      if (!res.ok) {
         setError('Error al guardar tu perfil. Contacta a soporte.')
         return
       }

@@ -14,7 +14,10 @@ export function Header({ title, subtitle }: HeaderProps) {
         <h1 className="text-lg font-semibold text-text-primary leading-tight">{title}</h1>
         {subtitle && <p className="text-xs text-text-secondary mt-0.5">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        <span className="text-xs font-bold tracking-widest uppercase text-primary/60 select-none hidden sm:block">
+          PLAY THE GAME
+        </span>
         <button className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-muted transition-colors">
           <Bell className="w-4 h-4" />
         </button>

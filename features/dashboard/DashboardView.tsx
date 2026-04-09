@@ -10,7 +10,7 @@ import {
 import { findCurrentRank, calcProjectedRank } from '@/lib/ranking'
 import { MONTHS_ES } from '@/types'
 import type { Profile, MonthlyInput, NonRecurringIncomeEntry, ScoringRule, RankingEntry, AdditionalPointEntry } from '@/types'
-import { BarChart3, TrendingUp, Target, Trophy, CircleDollarSign, Star } from 'lucide-react'
+import { BarChart3, TrendingUp, Target, Trophy, Star } from 'lucide-react'
 
 interface DashboardViewProps {
   profile: Profile
@@ -112,7 +112,7 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
   const rankDelta = currentRank && projectedRank ? currentRank - projectedRank : null
 
   // NRI total
-  const nriTotal = nriEntries.reduce((s, e) => s + e.amount, 0)
+
 
   // ── Matriz de indicadores ─────────────────────────────────────────────────────
   // Recopila todos los indicadores únicos de todos los meses
@@ -220,11 +220,21 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
             )}
           </div>
           <div className="bg-white rounded-2xl border border-border shadow-card p-5 flex-1 flex flex-col justify-center">
-            <p className="text-xs text-text-secondary uppercase tracking-wide mb-1">INF No Recurrentes</p>
-            <p className="text-3xl font-extrabold text-primary tabular-nums">
-              {nriTotal > 0 ? `$${(nriTotal / 1_000_000).toFixed(2)}M` : '—'}
+            <p className="text-xs text-text-secondary uppercase tracking-wide mb-1">Proyección Cierre Mes</p>
+            <p className="text-4xl font-extrabold text-primary tabular-nums">
+              {projectedRank ? `#${projectedRank}` : '—'}
             </p>
-            <p className="text-xs text-text-secondary mt-1">{nriEntries.length} {nriEntries.length === 1 ? 'registro' : 'registros'}</p>
+            <p className="text-xs text-text-secondary mt-1">Si cierras {MONTHS_ES[currentMonth - 1]} como vas</p>
+            {currentRank && projectedRank && projectedRank < currentRank && (
+              <p className="text-xs mt-1 font-medium text-success">
+                ▲ Subirías {currentRank - projectedRank} {currentRank - projectedRank === 1 ? 'posición' : 'posiciones'}
+              </p>
+            )}
+            {currentRank && projectedRank && projectedRank > currentRank && (
+              <p className="text-xs mt-1 font-medium text-danger">
+                ▼ Bajarías {projectedRank - currentRank} {projectedRank - currentRank === 1 ? 'posición' : 'posiciones'}
+              </p>
+            )}
           </div>
         </div>
       </div>

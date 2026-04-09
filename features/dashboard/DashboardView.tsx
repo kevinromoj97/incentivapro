@@ -10,7 +10,25 @@ import {
 import { findCurrentRank, calcProjectedRank } from '@/lib/ranking'
 import { MONTHS_ES } from '@/types'
 import type { Profile, MonthlyInput, NonRecurringIncomeEntry, ScoringRule, RankingEntry, AdditionalPointEntry } from '@/types'
-import { BarChart3, TrendingUp, Target, Trophy, Star } from 'lucide-react'
+import { BarChart3, TrendingUp, Target, Trophy, Star, Quote } from 'lucide-react'
+
+const FRASES = [
+  "El éxito no es un accidente. Es trabajo duro, perseverancia, aprendizaje, sacrificio y, sobre todo, amor por lo que haces.",
+  "Cada cliente que conquistas hoy es una posición que subes mañana.",
+  "Los números no mienten — y los tuyos tienen potencial. Haz que hablen.",
+  "No compitas con los demás. Compite con quien fuiste ayer.",
+  "El que no cierra hoy, le da espacio al que sí cierra. No dejes espacio.",
+  "Un punto más en tu promedio puede ser una posición arriba en el ranking. ¿Vale la llamada?",
+  "La disciplina de hoy es el resultado de mañana. Captura, mide, mejora.",
+  "Los primeros lugares no esperan a que el mes sea bueno. Lo hacen bueno.",
+  "Tu presupuesto es el piso, no el techo.",
+  "Cada mes es una oportunidad de reescribir tu posición. Empieza ahora.",
+  "El cliente ideal ya existe. Solo falta que lo encuentres antes que tu competencia.",
+  "Pequeñas mejoras consistentes superan a los grandes esfuerzos esporádicos.",
+  "El ranking no se mueve solo. Se construye visita a visita, llamada a llamada.",
+  "La diferencia entre el #1 y el #7 no es el talento — es la constancia.",
+  "Cierra el mes como quieres que te recuerden, no como el mes te lo pida.",
+]
 
 interface DashboardViewProps {
   profile: Profile
@@ -24,6 +42,7 @@ interface DashboardViewProps {
 
 export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntries, additionalPoints, year }: DashboardViewProps) {
   const currentMonth = new Date().getMonth() + 1
+  const frase = useMemo(() => FRASES[Math.floor(Math.random() * FRASES.length)], [])
 
   // ── NRI por mes ───────────────────────────────────────────────────────────────
   const nriByMonth = useMemo(() => {
@@ -237,6 +256,12 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
             )}
           </div>
         </div>
+      </div>
+
+      {/* ── Frase motivacional ───────────────────────────────────────────────── */}
+      <div className="bg-gradient-to-r from-accent/10 to-primary/5 border border-accent/20 rounded-2xl px-6 py-4 flex items-start gap-4">
+        <Quote className="w-5 h-5 text-accent shrink-0 mt-0.5 opacity-70" />
+        <p className="text-sm font-medium text-text-primary leading-relaxed italic">{frase}</p>
       </div>
 
       {/* ── Gráfica de tendencia ─────────────────────────────────────────────── */}

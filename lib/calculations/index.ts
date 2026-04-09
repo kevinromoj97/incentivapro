@@ -29,8 +29,8 @@ export function calcConsecucion(
   if (logro <= 0) return 0
 
   if (logro < minLogro) {
-    // Interpolación de 0% logro → 0 consecución hasta minLogro → minCons
-    return (logro / minLogro) * minCons
+    // Por debajo del mínimo → 0 puntos (DOR 2026: sin cobro por debajo del piso)
+    return 0
   }
 
   if (logro <= pptoLogro) {

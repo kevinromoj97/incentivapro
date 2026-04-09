@@ -21,25 +21,37 @@ export function findCurrentRank(
   return entry?.rank_position ?? null
 }
 
+const MONTH_COLS: (keyof RankingEntry)[] = [
+  'jan_pts','feb_pts','mar_pts','apr_pts','may_pts','jun_pts',
+  'jul_pts','aug_pts','sep_pts','oct_pts','nov_pts','dec_pts',
+]
+
+/** Promedio mensual de un competidor basado en sus meses con puntos > 0 */
+function competitorMonthlyAvg(entry: RankingEntry): number {
+  const monthPts = MONTH_COLS.map(k => entry[k] as number | null)
+  const captured = monthPts.filter(v => v != null && v > 0) as number[]
+  if (!captured.length) return entry.total_points  // fallback si no hay desglose
+  return captured.reduce((s, v) => s + v, 0) / captured.length
+}
+
 /**
- * Calcula posición proyectada:
- * Ordena todos los participantes por su total_points proyectado y devuelve la posición.
+ * Calcula posición proyectada comparando promedios mensuales.
+ * Así es justo sin importar cuántos meses lleva cada participante en el ranking.
+ * myMonthlyAvg: promedio mensual simulado del usuario (mismas unidades que competitors).
  */
 export function calcProjectedRank(
   entries: RankingEntry[],
-  myProjectedPoints: number,
+  myMonthlyAvg: number,
   employeeCode: string | null
 ): number | null {
   if (!entries.length) return null
 
-  // Simulamos el ranking con el total proyectado del ejecutivo actual
   const withProjected = entries.map(e => ({
     code: e.employee_code,
-    points: e.employee_code === employeeCode ? myProjectedPoints : e.total_points,
+    avg: e.employee_code === employeeCode ? myMonthlyAvg : competitorMonthlyAvg(e),
   }))
 
-  // Ordena descendente
-  withProjected.sort((a, b) => b.points - a.points)
+  withProjected.sort((a, b) => b.avg - a.avg)
 
   const idx = withProjected.findIndex(e => e.code === employeeCode)
   return idx >= 0 ? idx + 1 : null

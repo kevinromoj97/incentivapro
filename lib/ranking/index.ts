@@ -34,26 +34,33 @@ function competitorMonthlyAvg(entry: RankingEntry): number {
   return captured.reduce((s, v) => s + v, 0) / captured.length
 }
 
+/** Devuelve true si la entrada corresponde al usuario, evitando match null===null */
+function isMyEntry(e: RankingEntry, employeeCode: string | null, employeeName: string | null): boolean {
+  if (employeeCode && e.employee_code) return e.employee_code === employeeCode
+  if (employeeName) return e.employee_name.toLowerCase().includes(employeeName.toLowerCase())
+  return false
+}
+
 /**
  * Calcula posición proyectada comparando promedios mensuales.
- * Así es justo sin importar cuántos meses lleva cada participante en el ranking.
- * myMonthlyAvg: promedio mensual simulado del usuario (mismas unidades que competitors).
+ * Usa nombre como fallback cuando employee_code es null en el ranking.
  */
 export function calcProjectedRank(
   entries: RankingEntry[],
   myMonthlyAvg: number,
-  employeeCode: string | null
+  employeeCode: string | null,
+  employeeName?: string | null
 ): number | null {
   if (!entries.length) return null
 
   const withProjected = entries.map(e => ({
-    code: e.employee_code,
-    avg: e.employee_code === employeeCode ? myMonthlyAvg : competitorMonthlyAvg(e),
-  }))
+    isMe: isMyEntry(e, employeeCode, employeeName ?? null),
+    avg: competitorMonthlyAvg(e),
+  })).map(e => ({ ...e, avg: e.isMe ? myMonthlyAvg : e.avg }))
 
   withProjected.sort((a, b) => b.avg - a.avg)
 
-  const idx = withProjected.findIndex(e => e.code === employeeCode)
+  const idx = withProjected.findIndex(e => e.isMe)
   return idx >= 0 ? idx + 1 : null
 }
 

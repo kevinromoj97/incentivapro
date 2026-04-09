@@ -108,7 +108,7 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
 
   // Ranking
   const currentRank = findCurrentRank(rankingEntries, profile.employee_code, profile.full_name)
-  const projectedRank = calcProjectedRank(rankingEntries, monthlyAvg, profile.employee_code)
+  const projectedRank = calcProjectedRank(rankingEntries, monthlyAvg, profile.employee_code, profile.full_name)
   const rankDelta = currentRank && projectedRank ? currentRank - projectedRank : null
 
   // NRI total

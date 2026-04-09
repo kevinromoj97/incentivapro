@@ -116,7 +116,7 @@ export function SimulatorView({ profile, inputs, rules, rankingEntries, addition
   }, 0)
 
   const monthlyAvg = monthsWithData.length > 0 ? accumulatedPoints / monthsWithData.length : 0
-  const projectedRank = calcProjectedRank(rankingEntries, monthlyAvg, profile.employee_code)
+  const projectedRank = calcProjectedRank(rankingEntries, monthlyAvg, profile.employee_code, profile.full_name)
 
   const currentMonthResult = monthlyResults.find(m => m.month === currentMonth)
   const currentMonthTotal = (currentMonthResult?.totalPoints ?? 0) + simAddPts

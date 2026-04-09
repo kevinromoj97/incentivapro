@@ -265,3 +265,41 @@ cd ~/Desktop/incentivapro && npx vercel --prod --token TU_VERCEL_TOKEN_AQUI --ye
 5. **Puntos adicionales** — nueva tabla y sección `/puntos-adicionales` para registrar sostenibilidad, bonos de oficina, etc. por mes
 6. **Fix conteo de meses** — solo cuenta meses con `totalPoints > 0`, ignora registros residuales
 7. **Rename** — IncentivaPro → TuTableroDOR; nueva URL: https://tutablerodor.vercel.app
+
+---
+
+## Cambios realizados en sesión 3 (abril 2026)
+
+1. **Simulador rediseñado** (`features/simulation/SimulatorView.tsx`):
+   - Muestra **todos los indicadores** como filas editables (no solo los con datos capturados)
+   - **INF Total** como fila combinada (reemplaza INF No Recurrentes); se pre-llena sumando los sub-indicadores capturados (INF_Rec + INF_NoRec)
+   - Los sub-indicadores absorbidos no se muestran como filas separadas
+   - Usa `getMergedScoringRules` para respetar overrides personales de periodicidad
+   - Nueva fila **Puntos Adicionales (sim)** al final de la tabla — pre-llena con el real del mes actual, editable
+   - KPI principal: **promedio mensual** (igual que dashboard), incluye puntos adicionales por mes
+
+2. **Fix proyección de ranking** (`lib/ranking/index.ts`):
+   - `calcProjectedRank` ahora compara **promedios mensuales** en lugar de `total_points` anuales (unidades distintas)
+   - Nueva función `competitorMonthlyAvg()`: calcula promedio de un competidor desde sus columnas `jan_pts`, `feb_pts`, etc. (solo meses con pts > 0)
+   - **Fix crítico null===null**: cuando `employee_code` es null en el ranking (caso real), antes todos los competidores hacían match con el usuario. Ahora usa `full_name` como fallback
+   - `calcProjectedRank` acepta 4º parámetro `employeeName` para el fallback por nombre
+   - Dashboard y Simulador pasan `profile.full_name` al llamar la función
+
+3. **Dashboard — card Proyección Cierre Mes**:
+   - Card inferior derecho reemplazado: antes mostraba INF No Recurrentes, ahora muestra **posición proyectada si cierras el mes en curso con tu promedio actual**
+   - Muestra cuántas posiciones subirías o bajarías respecto a tu posición actual en el ranking
+   - Usa datos reales capturados (independiente del simulador)
+
+4. **Header — PLAY THE GAME** (`components/layout/Header.tsx`):
+   - Frase "PLAY THE GAME" en la esquina superior derecha de todas las páginas
+
+5. **Frase motivacional en Dashboard**:
+   - Card entre el hero y la gráfica con una frase aleatoria de 15 disponibles
+   - Se elige al azar cada vez que el ejecutivo carga el dashboard
+   - Frases orientadas a ventas, constancia y ranking
+
+### Lógica de proyección de ranking (resumen)
+- Los `employee_code` en el archivo de ranking subido son `null` para todos
+- El match se hace por nombre (`employee_name.includes(full_name)`)
+- La comparación es promedio mensual del usuario simulado vs promedio mensual de cada competidor
+- Competidores con `mar_pts = 0` solo promedian enero+febrero — automáticamente "justo" sin necesidad de proyectar marzo manualmente

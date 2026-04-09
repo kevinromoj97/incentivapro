@@ -173,30 +173,41 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
                             </span>
                           )}
                         </div>
-                        {isEditing ? (
-                          <select
-                            value={(editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual'}
-                            onChange={e => setEditValues(prev => ({
-                              ...prev,
-                              config_json: { ...(prev.config_json ?? {}), frequency: e.target.value },
-                            }))}
-                            className="input-clean text-xs py-1 w-36"
-                          >
-                            <option value="mensual">Mensual</option>
-                            <option value="trimestral">Trimestral</option>
-                            <option value="semestral">Semestral</option>
-                            <option value="anual">Anual</option>
-                          </select>
-                        ) : (
-                          <span className={cn(
-                            'text-xs capitalize',
-                            (override?.config_json?.frequency && override.config_json.frequency !== global.indicator?.frequency)
-                              ? 'text-accent-dark font-semibold'
-                              : 'text-text-secondary'
-                          )}>
-                            {(active.config_json?.frequency as string) || active.indicator?.frequency}
-                          </span>
-                        )}
+                        <select
+                          value={
+                            isEditing
+                              ? ((editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual')
+                              : ((active.config_json?.frequency as string) || active.indicator?.frequency || 'mensual')
+                          }
+                          onChange={e => {
+                            const newFreq = e.target.value
+                            if (isEditing) {
+                              setEditValues(prev => ({
+                                ...prev,
+                                config_json: { ...(prev.config_json ?? {}), frequency: newFreq },
+                              }))
+                            } else {
+                              // Entra en modo edición con la nueva frecuencia ya cargada
+                              setEditingId(global.indicator_id)
+                              setEditValues({
+                                weight:      active.weight,
+                                min_logro:   active.min_logro,
+                                ppto_logro:  active.ppto_logro,
+                                max_logro:   active.max_logro,
+                                min_cons:    active.min_cons,
+                                ppto_cons:   active.ppto_cons,
+                                max_cons:    active.max_cons,
+                                config_json: { ...(active.config_json ?? {}), frequency: newFreq },
+                              })
+                            }
+                          }}
+                          className="input-clean text-xs py-1 w-36"
+                        >
+                          <option value="mensual">Mensual</option>
+                          <option value="trimestral">Trimestral</option>
+                          <option value="semestral">Semestral</option>
+                          <option value="anual">Anual</option>
+                        </select>
                       </div>
                     </td>
                     <td className="text-right tabular-nums">

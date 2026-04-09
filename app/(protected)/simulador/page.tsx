@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
-import { getMyProfile, getMonthlyInputs, getScoringRules, getIndicators, getLatestRanking, getRankingEntries, getActivePeriod } from '@/lib/db/queries'
+import { getMyProfile, getMonthlyInputs, getMergedScoringRules, getIndicators, getLatestRanking, getRankingEntries, getActivePeriod, getAdditionalPoints } from '@/lib/db/queries'
 import { Header } from '@/components/layout/Header'
 import { SimulatorView } from '@/features/simulation/SimulatorView'
 
@@ -17,11 +17,12 @@ export default async function SimuladorPage() {
 
   const year = period?.year ?? new Date().getFullYear()
 
-  const [{ data: inputs }, { data: rules }, { data: indicators }, { data: latestRanking }] = await Promise.all([
+  const [{ data: inputs }, rules, { data: indicators }, { data: latestRanking }, { data: additionalPoints }] = await Promise.all([
     getMonthlyInputs(supabase, profile.id, year),
-    profile.position_id ? getScoringRules(supabase, profile.position_id) : Promise.resolve({ data: [] }),
+    profile.position_id ? getMergedScoringRules(supabase, profile.position_id, profile.id) : Promise.resolve([]),
     getIndicators(supabase),
     getLatestRanking(supabase, year),
+    getAdditionalPoints(supabase, profile.id, year),
   ])
 
   const rankingEntries = latestRanking
@@ -39,6 +40,7 @@ export default async function SimuladorPage() {
           rules={rules ?? []}
           indicators={indicators ?? []}
           rankingEntries={rankingEntries}
+          additionalPoints={additionalPoints ?? []}
           year={year}
         />
       </div>

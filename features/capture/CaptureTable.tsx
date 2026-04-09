@@ -30,8 +30,16 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
   const [isPending, startTransition] = useTransition()
   const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
-  // Indicadores relevantes para este puesto (los que tienen regla)
-  const myIndicators = indicators.filter(ind => rules.some(r => r.indicator_id === ind.id))
+  // Códigos de sub-indicadores que se combinan en una regla (ej: INF para Mediana Empresa)
+  const combinedCodes = rules.flatMap(r => (r.config_json?.combines as string[] | undefined) ?? [])
+  // IDs de indicadores que actúan como "contenedor" de combines (no se capturan directamente)
+  const combiningIds = rules.filter(r => r.config_json?.combines).map(r => r.indicator_id)
+
+  // Mostrar: indicadores con regla propia (excepto los contenedores) + sub-indicadores de combines
+  const myIndicators = indicators.filter(ind =>
+    (rules.some(r => r.indicator_id === ind.id) && !combiningIds.includes(ind.id)) ||
+    combinedCodes.includes(ind.code)
+  )
 
   // Estado inicial desde los inputs existentes
   const [cells, setCells] = useState<CellMap>(() => {

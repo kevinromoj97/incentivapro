@@ -47,11 +47,22 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
       let totalPoints = 0
       const results = []
 
-      for (const inp of monthInputs) {
-        const rule = rules.find(r => r.indicator_id === inp.indicator_id)
-        if (!rule || !inp.indicator) continue
+      // Reglas que combinan sub-indicadores (ej: INF Total = INF_Rec + INF_NoRec)
+      const combiningRules = rules.filter(r => r.config_json?.combines)
+      // Códigos absorbidos por una regla combinada (no se calculan individualmente)
+      const absorbedCodes = new Set(
+        combiningRules.flatMap(r => (r.config_json!.combines as string[]))
+      )
 
-        // Inyectar NRI al indicador correspondiente
+      // ── Indicadores individuales ──────────────────────────────────────────
+      for (const inp of monthInputs) {
+        if (!inp.indicator) continue
+        // Saltar los que son parte de un combine (se procesan abajo)
+        if (absorbedCodes.has(inp.indicator.code)) continue
+
+        const rule = rules.find(r => r.indicator_id === inp.indicator_id)
+        if (!rule) continue
+
         let actualResult = inp.actual_result
         if (inp.indicator.code === 'INF_NO_RECURRENTES' && nriByMonth[month]) {
           actualResult += nriByMonth[month]
@@ -65,6 +76,42 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
           rule.weight,
           inp.target_budget,
           actualResult,
+          {
+            minLogro: rule.min_logro,
+            pptoLogro: rule.ppto_logro,
+            maxLogro: rule.max_logro,
+            minCons: rule.min_cons,
+            pptoCons: rule.ppto_cons,
+            maxCons: rule.max_cons,
+          }
+        )
+        totalPoints += result.points
+        results.push(result)
+      }
+
+      // ── Indicadores combinados (ej: INF Total para Mediana Empresa) ───────
+      for (const rule of combiningRules) {
+        const codes = rule.config_json!.combines as string[]
+        const subInputs = monthInputs.filter(inp => inp.indicator && codes.includes(inp.indicator.code))
+        if (subInputs.length === 0) continue
+
+        const combinedBudget = subInputs.reduce((s, i) => s + i.target_budget, 0)
+        const combinedResult = subInputs.reduce((s, i) => {
+          let res = i.actual_result
+          if (i.indicator?.code === 'INF_NO_RECURRENTES' && nriByMonth[month]) {
+            res += nriByMonth[month]
+          }
+          return s + res
+        }, 0)
+
+        const result = calcIndicatorResult(
+          rule.indicator_id,
+          rule.indicator?.code ?? 'INF_TOTAL',
+          rule.indicator?.name ?? 'INF Total',
+          rule.indicator?.frequency ?? 'trimestral',
+          rule.weight,
+          combinedBudget,
+          combinedResult,
           {
             minLogro: rule.min_logro,
             pptoLogro: rule.ppto_logro,

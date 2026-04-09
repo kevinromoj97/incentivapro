@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/auth/server'
 import { redirect } from 'next/navigation'
-import { getMyProfile, getMonthlyInputs, getMergedScoringRules, getLatestRanking, getRankingEntries, getNonRecurringIncome, getActivePeriod } from '@/lib/db/queries'
+import { getMyProfile, getMonthlyInputs, getMergedScoringRules, getLatestRanking, getRankingEntries, getNonRecurringIncome, getAdditionalPoints, getActivePeriod } from '@/lib/db/queries'
 import { Header } from '@/components/layout/Header'
 import { DashboardView } from '@/features/dashboard/DashboardView'
 
@@ -26,11 +26,13 @@ export default async function DashboardPage() {
     { data: nriEntries },
     { data: rules },
     { data: latestRanking },
+    { data: additionalPoints },
   ] = await Promise.all([
     getMonthlyInputs(supabase, profile.id, year),
     getNonRecurringIncome(supabase, profile.id, year),
     profile.position_id ? getMergedScoringRules(supabase, profile.position_id, profile.id).then(r => ({ data: r })) : Promise.resolve({ data: [] }),
     getLatestRanking(supabase, year),
+    getAdditionalPoints(supabase, profile.id, year),
   ])
 
   const rankingEntries = latestRanking
@@ -50,6 +52,7 @@ export default async function DashboardPage() {
           nriEntries={nriEntries ?? []}
           rules={rules ?? []}
           rankingEntries={rankingEntries}
+          additionalPoints={additionalPoints ?? []}
           year={year}
         />
       </div>

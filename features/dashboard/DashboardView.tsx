@@ -9,7 +9,7 @@ import {
 } from '@/lib/calculations'
 import { findCurrentRank, calcProjectedRank } from '@/lib/ranking'
 import { MONTHS_ES } from '@/types'
-import type { Profile, MonthlyInput, NonRecurringIncomeEntry, ScoringRule, RankingEntry } from '@/types'
+import type { Profile, MonthlyInput, NonRecurringIncomeEntry, ScoringRule, RankingEntry, AdditionalPointEntry } from '@/types'
 import { BarChart3, TrendingUp, Target, Trophy, CircleDollarSign, Star } from 'lucide-react'
 
 interface DashboardViewProps {
@@ -18,10 +18,11 @@ interface DashboardViewProps {
   nriEntries: NonRecurringIncomeEntry[]
   rules: ScoringRule[]
   rankingEntries: RankingEntry[]
+  additionalPoints: AdditionalPointEntry[]
   year: number
 }
 
-export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntries, year }: DashboardViewProps) {
+export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntries, additionalPoints, year }: DashboardViewProps) {
   const currentMonth = new Date().getMonth() + 1
 
   // ── NRI por mes ───────────────────────────────────────────────────────────────
@@ -81,7 +82,11 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
   const monthsWithData = monthlyResults.filter(m => m.hasData && m.month <= currentMonth)
   const monthsWithDataNums = monthsWithData.map(m => m.month)
   const accumulatedPoints = monthsWithData.reduce((s, m) => s + m.totalPoints, 0)
-  const monthlyAvg = monthsWithData.length > 0 ? accumulatedPoints / monthsWithData.length : 0
+  // Puntos adicionales (sostenibilidad, etc.) sumados al acumulado
+  const additionalTotal = additionalPoints.reduce((s, e) => s + e.points, 0)
+  const monthlyAvg = monthsWithData.length > 0
+    ? (accumulatedPoints + additionalTotal) / monthsWithData.length
+    : 0
 
   // Proyección: promedio actual × 12
   const projectedPoints = monthlyAvg * 12
@@ -181,6 +186,12 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
               <span className="block text-xs uppercase tracking-wide opacity-70">vs Ppto</span>
               <span className="font-semibold">{formatPct(budgetPct)}</span>
             </div>
+            {additionalTotal > 0 && (
+              <div>
+                <span className="block text-xs uppercase tracking-wide opacity-70">Pts Adicionales</span>
+                <span className="font-semibold">+{additionalTotal.toFixed(2)}</span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import type { Profile } from '@/types'
 import {
   LayoutDashboard, CalendarDays, TrendingUp, BarChart3, Trophy,
-  Users, Upload, Settings, LogOut, ChevronRight, Zap,
+  Users, Upload, Settings, LogOut, ChevronRight, Zap, Star,
 } from 'lucide-react'
 
 interface NavItem {
@@ -24,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Simulador',              href: '/simulador',                   icon: Zap },
   { label: 'Ranking',                href: '/ranking',                     icon: Trophy },
   { label: 'Cargar Ranking',         href: '/cargar-ranking',              icon: Upload,   hideForAdmin: true },
+  { label: 'Puntos Adicionales',     href: '/puntos-adicionales',          icon: Star,     hideForAdmin: true },
   { label: 'Mis Reglas',             href: '/mis-reglas',                  icon: Settings, hideForAdmin: true },
   { label: 'Usuarios',               href: '/admin/usuarios',              icon: Users,    adminOnly: true },
   { label: 'Cargar Ranking',         href: '/admin/ranking',               icon: Upload,   adminOnly: true },

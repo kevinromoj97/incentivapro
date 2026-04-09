@@ -5,7 +5,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
-  Profile, MonthlyInput, NonRecurringIncomeEntry,
+  Profile, MonthlyInput, NonRecurringIncomeEntry, AdditionalPointEntry,
   Ranking, RankingEntry, ScoringRule, Indicator, Period,
   Position, League, Simulation,
 } from '@/types'
@@ -92,6 +92,33 @@ export async function insertNRI(
 
 export async function deleteNRI(supabase: SupabaseClient, id: string) {
   return supabase.from('non_recurring_income_entries').delete().eq('id', id)
+}
+
+// ─── Additional Point Entries ─────────────────────────────────────────────────
+
+export async function getAdditionalPoints(
+  supabase: SupabaseClient,
+  userId: string,
+  year: number
+) {
+  return supabase
+    .from('additional_point_entries')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('year', year)
+    .order('month')
+    .order('created_at')
+}
+
+export async function insertAdditionalPoint(
+  supabase: SupabaseClient,
+  data: Omit<AdditionalPointEntry, 'id' | 'created_at' | 'updated_at'>
+) {
+  return supabase.from('additional_point_entries').insert(data).select().single()
+}
+
+export async function deleteAdditionalPoint(supabase: SupabaseClient, id: string) {
+  return supabase.from('additional_point_entries').delete().eq('id', id)
 }
 
 // ─── Rankings ─────────────────────────────────────────────────────────────────
@@ -209,13 +236,14 @@ export async function upsertUserScoringRule(
     return supabase
       .from('scoring_rules')
       .update({
-        weight:     data.weight,
-        min_logro:  data.min_logro,
-        ppto_logro: data.ppto_logro,
-        max_logro:  data.max_logro,
-        min_cons:   data.min_cons,
-        ppto_cons:  data.ppto_cons,
-        max_cons:   data.max_cons,
+        weight:      data.weight,
+        min_logro:   data.min_logro,
+        ppto_logro:  data.ppto_logro,
+        max_logro:   data.max_logro,
+        min_cons:    data.min_cons,
+        ppto_cons:   data.ppto_cons,
+        max_cons:    data.max_cons,
+        config_json: data.config_json ?? null,
       })
       .eq('id', existing.id)
       .select('*, indicator:indicators(*), position:positions(*)')

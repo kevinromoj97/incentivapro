@@ -82,6 +82,18 @@ export interface MonthlyInput {
   indicator?: Indicator
 }
 
+export interface AdditionalPointEntry {
+  id: string
+  user_id: string
+  period_id: string
+  year: number
+  month: number
+  points: number
+  description: string
+  created_at: string
+  updated_at: string
+}
+
 export interface NonRecurringIncomeEntry {
   id: string
   user_id: string

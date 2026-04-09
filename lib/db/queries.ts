@@ -57,6 +57,23 @@ export async function upsertMonthlyInput(
     .single()
 }
 
+export async function deleteManyMonthlyInputs(
+  supabase: SupabaseClient,
+  userId: string,
+  year: number,
+  month: number,
+  indicatorIds: string[]
+) {
+  if (indicatorIds.length === 0) return { error: null }
+  return supabase
+    .from('monthly_inputs')
+    .delete()
+    .eq('user_id', userId)
+    .eq('year', year)
+    .eq('month', month)
+    .in('indicator_id', indicatorIds)
+}
+
 export async function upsertManyMonthlyInputs(
   supabase: SupabaseClient,
   inputs: Array<Omit<MonthlyInput, 'id' | 'created_at' | 'updated_at'>>

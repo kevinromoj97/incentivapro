@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { createClient } from '@/lib/auth/client'
-import { upsertManyMonthlyInputs } from '@/lib/db/queries'
+import { upsertManyMonthlyInputs, deleteManyMonthlyInputs } from '@/lib/db/queries'
 import { calcConsecucion, calcStatus, formatPct, formatPoints } from '@/lib/calculations'
 import { StatusBadge, logroToStatus } from '@/components/shared/StatusBadge'
 import { MONTHS_ES } from '@/types'
@@ -93,7 +93,28 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
       }
     }
 
+    // Celdas en 0/0 que deben eliminarse (registros residuales)
+    const toDelete: Record<number, string[]> = {} // month → indicatorIds
+    for (const ind of myIndicators) {
+      for (let m = 1; m <= 12; m++) {
+        const cell = cells[ind.id]?.[m]
+        if (!cell) continue
+        const budget = parseFloat(cell.budget) || 0
+        const result = parseFloat(cell.result) || 0
+        if (budget === 0 && result === 0) {
+          if (!toDelete[m]) toDelete[m] = []
+          toDelete[m].push(ind.id)
+        }
+      }
+    }
+
     startTransition(async () => {
+      // Borrar registros que quedaron en 0/0
+      await Promise.all(
+        Object.entries(toDelete).map(([m, ids]) =>
+          deleteManyMonthlyInputs(supabase, profile.id, year, parseInt(m), ids)
+        )
+      )
       const { error } = await upsertManyMonthlyInputs(supabase, toSave as Parameters<typeof upsertManyMonthlyInputs>[1])
       if (error) {
         setToast({ type: 'error', msg: 'Error al guardar. Intenta de nuevo.' })

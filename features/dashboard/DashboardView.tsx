@@ -80,15 +80,22 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
     })
   }, [inputs, rules, nriByMonth])
 
+  // ── Puntos adicionales por mes ────────────────────────────────────────────────
+  const additionalByMonth = useMemo(() => {
+    const map: Record<number, number> = {}
+    for (const e of additionalPoints) map[e.month] = (map[e.month] ?? 0) + e.points
+    return map
+  }, [additionalPoints])
+
   // ── KPIs ──────────────────────────────────────────────────────────────────────
   const monthsWithData = monthlyResults.filter(m => m.hasData && m.month <= currentMonth)
   const monthsWithDataNums = monthsWithData.map(m => m.month)
-  const accumulatedPoints = monthsWithData.reduce((s, m) => s + m.totalPoints, 0)
-  // Puntos adicionales (sostenibilidad, etc.) sumados al acumulado
+  // Cada mes acumula sus puntos de indicadores + sus puntos adicionales de ese mes
+  const accumulatedPoints = monthsWithData.reduce(
+    (s, m) => s + m.totalPoints + (additionalByMonth[m.month] ?? 0), 0
+  )
   const additionalTotal = additionalPoints.reduce((s, e) => s + e.points, 0)
-  const monthlyAvg = monthsWithData.length > 0
-    ? (accumulatedPoints + additionalTotal) / monthsWithData.length
-    : 0
+  const monthlyAvg = monthsWithData.length > 0 ? accumulatedPoints / monthsWithData.length : 0
 
   // Proyección: promedio actual × 12
   const projectedPoints = monthlyAvg * 12

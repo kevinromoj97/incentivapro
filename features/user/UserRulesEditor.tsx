@@ -126,9 +126,8 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
       <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4">
         <p className="text-sm text-primary font-medium flex items-center gap-2">
           <Settings className="w-4 h-4" />
-          Puedes personalizar los umbrales y pesos de cada indicador. Tus cambios solo afectan
-          tus propios cálculos, no los de otros ejecutivos. Usa &quot;Restablecer&quot; para volver al
-          valor global configurado por el administrador.
+          Puedes personalizar la periodicidad, pesos y umbrales de cada indicador. Tus cambios solo afectan
+          tus propios cálculos. Usa &quot;Restablecer&quot; para volver al valor global.
         </p>
       </div>
 
@@ -173,41 +172,43 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
                             </span>
                           )}
                         </div>
-                        <select
-                          value={
-                            isEditing
-                              ? ((editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual')
-                              : ((active.config_json?.frequency as string) || active.indicator?.frequency || 'mensual')
-                          }
-                          onChange={e => {
-                            const newFreq = e.target.value
-                            if (isEditing) {
-                              setEditValues(prev => ({
-                                ...prev,
-                                config_json: { ...(prev.config_json ?? {}), frequency: newFreq },
-                              }))
-                            } else {
-                              // Entra en modo edición con la nueva frecuencia ya cargada
-                              setEditingId(global.indicator_id)
-                              setEditValues({
-                                weight:      active.weight,
-                                min_logro:   active.min_logro,
-                                ppto_logro:  active.ppto_logro,
-                                max_logro:   active.max_logro,
-                                min_cons:    active.min_cons,
-                                ppto_cons:   active.ppto_cons,
-                                max_cons:    active.max_cons,
-                                config_json: { ...(active.config_json ?? {}), frequency: newFreq },
-                              })
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-xs text-text-secondary">Periodicidad:</span>
+                          <select
+                            value={
+                              isEditing
+                                ? ((editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual')
+                                : ((active.config_json?.frequency as string) || active.indicator?.frequency || 'mensual')
                             }
-                          }}
-                          className="input-clean text-xs py-1 w-36"
-                        >
-                          <option value="mensual">Mensual</option>
-                          <option value="trimestral">Trimestral</option>
-                          <option value="semestral">Semestral</option>
-                          <option value="anual">Anual</option>
-                        </select>
+                            onChange={e => {
+                              const newFreq = e.target.value
+                              if (isEditing) {
+                                setEditValues(prev => ({
+                                  ...prev,
+                                  config_json: { ...(prev.config_json ?? {}), frequency: newFreq },
+                                }))
+                              } else {
+                                setEditingId(global.indicator_id)
+                                setEditValues({
+                                  weight:      active.weight,
+                                  min_logro:   active.min_logro,
+                                  ppto_logro:  active.ppto_logro,
+                                  max_logro:   active.max_logro,
+                                  min_cons:    active.min_cons,
+                                  ppto_cons:   active.ppto_cons,
+                                  max_cons:    active.max_cons,
+                                  config_json: { ...(active.config_json ?? {}), frequency: newFreq },
+                                })
+                              }
+                            }}
+                            style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '2px 6px', fontSize: '12px', backgroundColor: 'white', cursor: 'pointer' }}
+                          >
+                            <option value="mensual">Mensual</option>
+                            <option value="trimestral">Trimestral</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual">Anual</option>
+                          </select>
+                        </div>
                       </div>
                     </td>
                     <td className="text-right tabular-nums">

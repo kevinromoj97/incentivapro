@@ -67,16 +67,15 @@ export function RegisterForm({ positions, leagues }: RegisterFormProps) {
         return
       }
 
-      // 2. Insertar perfil con puesto y liga
-      const { error: profileError } = await supabase.from('profiles').insert({
-        auth_user_id: authData.user.id,
+      // 2. Actualizar perfil (el trigger ya lo creó al registrar en Auth)
+      const { error: profileError } = await supabase.from('profiles').update({
         full_name: form.fullName,
         email: form.email,
         role: 'ejecutivo',
         position_id: form.positionId,
         league_id: form.leagueId,
         employee_code: form.employeeCode || null,
-      })
+      }).eq('auth_user_id', authData.user.id)
 
       if (profileError) {
         setError('Error al guardar tu perfil. Contacta a soporte.')

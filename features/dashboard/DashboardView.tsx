@@ -88,7 +88,8 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
   }, [additionalPoints])
 
   // ── KPIs ──────────────────────────────────────────────────────────────────────
-  const monthsWithData = monthlyResults.filter(m => m.hasData && m.month <= currentMonth)
+  // Solo meses con puntos reales en indicadores base (excluye residuos y meses en cero)
+  const monthsWithData = monthlyResults.filter(m => m.totalPoints > 0 && m.month <= currentMonth)
   const monthsWithDataNums = monthsWithData.map(m => m.month)
   // Cada mes acumula sus puntos de indicadores + sus puntos adicionales de ese mes
   const accumulatedPoints = monthsWithData.reduce(

@@ -143,8 +143,7 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
           <table className="w-full data-table min-w-[900px]">
             <thead>
               <tr>
-                <th className="text-left">Indicador</th>
-                <th className="text-left">Periodicidad</th>
+                <th className="text-left">Indicador / Periodicidad</th>
                 <th className="text-right">Peso</th>
                 <th className="text-right">Logro Mín %</th>
                 <th className="text-right">Logro Ppto %</th>
@@ -163,41 +162,42 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
                 return (
                   <tr key={global.indicator_id} className={cn(isCustom && 'bg-accent/3')}>
                     <td>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm text-text-primary">
-                          {global.indicator?.name ?? global.indicator_id}
-                        </span>
-                        {isCustom && (
-                          <span className="text-[10px] bg-accent/20 text-accent-dark px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide">
-                            Personalizada
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-text-primary">
+                            {global.indicator?.name ?? global.indicator_id}
+                          </span>
+                          {isCustom && (
+                            <span className="text-[10px] bg-accent/20 text-accent-dark px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide">
+                              Personalizada
+                            </span>
+                          )}
+                        </div>
+                        {isEditing ? (
+                          <select
+                            value={(editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual'}
+                            onChange={e => setEditValues(prev => ({
+                              ...prev,
+                              config_json: { ...(prev.config_json ?? {}), frequency: e.target.value },
+                            }))}
+                            className="input-clean text-xs py-1 w-36"
+                          >
+                            <option value="mensual">Mensual</option>
+                            <option value="trimestral">Trimestral</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual">Anual</option>
+                          </select>
+                        ) : (
+                          <span className={cn(
+                            'text-xs capitalize',
+                            (override?.config_json?.frequency && override.config_json.frequency !== global.indicator?.frequency)
+                              ? 'text-accent-dark font-semibold'
+                              : 'text-text-secondary'
+                          )}>
+                            {(active.config_json?.frequency as string) || active.indicator?.frequency}
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td className="text-xs text-text-secondary capitalize">
-                      {isEditing ? (
-                        <select
-                          value={(editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual'}
-                          onChange={e => setEditValues(prev => ({
-                            ...prev,
-                            config_json: { ...(prev.config_json ?? {}), frequency: e.target.value },
-                          }))}
-                          className="input-clean text-sm py-1"
-                        >
-                          <option value="mensual">Mensual</option>
-                          <option value="trimestral">Trimestral</option>
-                          <option value="semestral">Semestral</option>
-                          <option value="anual">Anual</option>
-                        </select>
-                      ) : (
-                        <span className={cn(
-                          (override?.config_json?.frequency && override.config_json.frequency !== global.indicator?.frequency)
-                            ? 'text-accent-dark font-semibold'
-                            : ''
-                        )}>
-                          {(active.config_json?.frequency as string) || active.indicator?.frequency}
-                        </span>
-                      )}
                     </td>
                     <td className="text-right tabular-nums">
                       {isEditing ? field('weight') : <span className="font-bold text-primary">{active.weight}</span>}

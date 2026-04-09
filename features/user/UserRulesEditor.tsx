@@ -144,7 +144,7 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
             <thead>
               <tr>
                 <th className="text-left">Indicador</th>
-                <th className="text-left hidden sm:table-cell">Periodicidad</th>
+                <th className="text-left">Periodicidad</th>
                 <th className="text-right">Peso</th>
                 <th className="text-right">Logro Mín %</th>
                 <th className="text-right">Logro Ppto %</th>
@@ -174,7 +174,7 @@ export function UserRulesEditor({ profile, globalRules, userRules }: UserRulesEd
                         )}
                       </div>
                     </td>
-                    <td className="hidden sm:table-cell text-xs text-text-secondary capitalize">
+                    <td className="text-xs text-text-secondary capitalize">
                       {isEditing ? (
                         <select
                           value={(editValues.config_json?.frequency as string) || global.indicator?.frequency || 'mensual'}

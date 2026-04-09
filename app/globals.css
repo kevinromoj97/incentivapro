@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 213 20% 97%;
+    --foreground: 229 29% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 229 29% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 229 29% 14%;
+    --primary: 212 100% 26%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 229 29% 14%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 177 50% 55%;
+    --accent-foreground: 212 100% 18%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 212 100% 26%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* KPI Card */
+  .kpi-card {
+    @apply bg-surface rounded-lg p-5 shadow-card border border-border transition-shadow duration-200 hover:shadow-card-hover;
+  }
+
+  /* Status badge semáforo */
+  .badge-success { @apply bg-success/10 text-success font-medium; }
+  .badge-warning { @apply bg-warning/10 text-warning font-medium; }
+  .badge-danger  { @apply bg-danger/10  text-danger  font-medium; }
+
+  /* Table refinada */
+  .data-table th {
+    @apply text-xs font-semibold text-text-secondary uppercase tracking-wider py-3 px-4 bg-muted;
+  }
+  .data-table td {
+    @apply py-3 px-4 text-sm border-b border-border;
+  }
+  .data-table tr:last-child td { @apply border-b-0; }
+  .data-table tr:hover td { @apply bg-muted/50; }
+
+  /* Sidebar link */
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium
+           text-white/70 hover:text-white hover:bg-white/10
+           transition-all duration-150 cursor-pointer;
+  }
+  .nav-link.active {
+    @apply text-white bg-white/15;
+  }
+
+  /* Input clean */
+  .input-clean {
+    @apply w-full rounded-md border border-border bg-surface px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
+           transition-colors duration-150;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in { animation: fade-in 0.4s ease-out; }
+  .text-gradient {
+    background: linear-gradient(135deg, #004481, #5AC4BE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

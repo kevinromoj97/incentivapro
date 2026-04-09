@@ -6,7 +6,7 @@ import { upsertManyMonthlyInputs, deleteManyMonthlyInputs } from '@/lib/db/queri
 import { calcConsecucion, calcStatus, formatPct, formatPoints } from '@/lib/calculations'
 import { StatusBadge, logroToStatus } from '@/components/shared/StatusBadge'
 import { MONTHS_ES } from '@/types'
-import { Save, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Save, Loader2, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import type { Profile, MonthlyInput, ScoringRule, Indicator, Period } from '@/types'
 
@@ -56,6 +56,22 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
     }
     return map
   })
+
+  async function handleClearMonth(month: number) {
+    // Limpia todas las celdas del mes en UI
+    setCells(prev => {
+      const next = { ...prev }
+      for (const ind of myIndicators) {
+        next[ind.id] = { ...next[ind.id], [month]: { budget: '', result: '' } }
+      }
+      return next
+    })
+    // Borra los registros del mes en DB
+    const supabase = createClient()
+    await deleteManyMonthlyInputs(supabase, profile.id, year, month, myIndicators.map(i => i.id))
+    setToast({ type: 'success', msg: `Datos de ${MONTHS_ES[month - 1]} eliminados.` })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   function handleChange(indicatorId: string, month: number, field: 'budget' | 'result', value: string) {
     setCells(prev => ({
@@ -248,6 +264,15 @@ export function CaptureTable({ profile, period, inputs, rules, indicators, year 
                             <span className="text-sm font-medium text-text-primary">{monthName}</span>
                             {isCurrentMonth && isApplicable && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">Actual</span>}
                             {!isApplicable && <span className="text-[10px] text-text-secondary italic">N/A</span>}
+                            {isApplicable && (cell.budget !== '' || cell.result !== '') && (
+                              <button
+                                onClick={() => handleClearMonth(month)}
+                                title="Limpiar mes"
+                                className="text-text-secondary hover:text-danger transition-colors ml-auto"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
                           </div>
                         </td>
                         <td className="py-2 px-2">

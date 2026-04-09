@@ -40,7 +40,9 @@ export function DashboardView({ profile, inputs, nriEntries, rules, rankingEntri
     return Array.from({ length: 12 }, (_, i) => {
       const month = i + 1
       const monthInputs = inputs.filter(inp => inp.month === month)
-      if (monthInputs.length === 0) return { month, monthName: MONTHS_ES[i], totalPoints: 0, hasData: false, results: [] }
+      // Un mes solo cuenta como capturado si al menos un indicador tiene presupuesto > 0
+      const hasRealData = monthInputs.some(inp => inp.target_budget > 0)
+      if (!hasRealData) return { month, monthName: MONTHS_ES[i], totalPoints: 0, hasData: false, results: [] }
 
       let totalPoints = 0
       const results = []
